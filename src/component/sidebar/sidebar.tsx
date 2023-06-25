@@ -1,4 +1,5 @@
 import { ConnectButton } from "./ConnectButton";
+import { PostButton } from "./PostButton";
 import { SideMenuButton } from "./SideMenuButton";
 
 type SideMenuType = { title: string; href: string };
@@ -30,10 +31,3 @@ export const Sidebar = () => {
   );
 };
 
-const PostButton = () => {
-  return (
-    <button className="bg-violet-9 hover:bg-violet-10 px-8 py-2 rounded-[10px] text-lg">
-      投稿する
-    </button>
-  );
-};

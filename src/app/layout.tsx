@@ -1,9 +1,8 @@
 import "tailwindcss/tailwind.css";
 
 import type { Metadata } from "next";
+import { Sidebar } from "src/component/sidebar";
 import { WagmiConfigClient } from "src/utils/wagmi/WagmiConfigClient";
-
-import { Sidebar } from "./sidebar/sidebar";
 
 export const metadata: Metadata = {
   title: "Social Network 3 | unchain",

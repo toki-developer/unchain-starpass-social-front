@@ -12,6 +12,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.15",
     "@radix-ui/colors": "^1.0.0",
     "@web3modal/ethereum": "^2.3.7",
     "@web3modal/react": "^2.3.7",
