@@ -1,4 +1,4 @@
-export const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const contractAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
 export const abi = [
   {
     inputs: [],
@@ -50,6 +50,11 @@ export const abi = [
             name: "time",
             type: "uint256",
           },
+          {
+            internalType: "uint256",
+            name: "isLike",
+            type: "uint256",
+          },
         ],
         internalType: "struct ISocialNetwork.PostDetail",
         name: "",
@@ -94,6 +99,11 @@ export const abi = [
           {
             internalType: "uint256",
             name: "time",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "isLike",
             type: "uint256",
           },
         ],
@@ -145,3 +155,6 @@ export const abi = [
     type: "function",
   },
 ] as const;
+
+export const NO_LIKED = 1;
+export const LIKED = 2;

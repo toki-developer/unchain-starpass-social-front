@@ -69,7 +69,7 @@ module.exports = {
       {
         selector: ["variable", "parameter"],
         types: ["boolean", "string", "number", "array"],
-        format: ["camelCase"],
+        format: ["camelCase", "UPPER_CASE"],
       },
       {
         selector: "variable",
