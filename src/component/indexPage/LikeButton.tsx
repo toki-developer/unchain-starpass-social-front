@@ -1,6 +1,11 @@
 import type { BigNumber } from "ethers";
 import { useState } from "react";
-import { abi, contractAddress, LIKED, NO_LIKED } from "src/utils/contract/const";
+import {
+  abi,
+  contractAddress,
+  LIKED,
+  NO_LIKED,
+} from "src/utils/contract/const";
 import { useContractWrite, useTransaction } from "wagmi";
 
 type Props = {
@@ -17,34 +22,41 @@ export const LikeButton = ({
   const [isLike, setIsLike] = useState(isLikeProps);
   const [totalLikes, setTotalLikes] = useState(totalLikesProps);
 
-  const {isLikeLoading, like} = useLike({postId, onSuccess: () => {
-    setIsLike(LIKED);
-    setTotalLikes((v) => v + 1);
-  }})
+  const { isLikeLoading, like } = useLike({
+    postId,
+    onSuccess: () => {
+      setIsLike(LIKED);
+      setTotalLikes((v) => v + 1);
+    },
+  });
 
-  const {isUnlikeLoading, unlike} = useUnlike({postId, onSuccess: () => {
-    setIsLike(NO_LIKED);
-    setTotalLikes((v) => v - 1);
-  }})
-
-
+  const { isUnlikeLoading, unlike } = useUnlike({
+    postId,
+    onSuccess: () => {
+      setIsLike(NO_LIKED);
+      setTotalLikes((v) => v - 1);
+    },
+  });
 
   const handleClick = () => {
     //TODO: loading中は押せないように
-    if(isLike == LIKED) {
-        if (unlike) {
-            unlike();
-          }
-    }else {
-        if (like) {
-            like();
-          }
+    if (isLike == LIKED) {
+      if (unlike) {
+        unlike();
+      }
+    } else {
+      if (like) {
+        like();
+      }
     }
   };
 
   if (isLikeLoading || isUnlikeLoading) {
-    //TODO: loading
-    return <div></div>;
+    return (
+      <div className="flex justify-center items-center" aria-label="読み込み中">
+        <div className="animate-spin h-4 w-4 border-2 border-violet-10 rounded-full border-t-transparent"></div>
+      </div>
+    );
   }
 
   return (
@@ -71,54 +83,62 @@ export const LikeButton = ({
 };
 
 type HooksProps = {
-    postId: BigNumber
-    onSuccess: () => void
-}
+  postId: BigNumber;
+  onSuccess: () => void;
+};
 
-const useLike = ({onSuccess, postId}: HooksProps) => {
-    const { data, isLoading, write: like } = useContractWrite({
-        address: contractAddress,
-        abi: abi,
-        functionName: "like",
-        args: [postId],
-        mode: "recklesslyUnprepared",
+const useLike = ({ onSuccess, postId }: HooksProps) => {
+  const {
+    data,
+    isLoading,
+    write: like,
+  } = useContractWrite({
+    address: contractAddress,
+    abi: abi,
+    functionName: "like",
+    args: [postId],
+    mode: "recklesslyUnprepared",
+  });
+
+  const { isLoading: isTxLoading } = useTransaction({
+    hash: data?.hash,
+    onSuccess: async (tx) => {
+      tx.wait().then((v) => {
+        if (v.status == 1) {
+          //TODO: 再フェッチ
+          onSuccess();
+        }
       });
+    },
+  });
 
-      const { isLoading: isTxLoading } = useTransaction({
-        hash: data?.hash,
-        onSuccess: async (tx) => {
-          tx.wait().then((v) => {
-            if (v.status == 1) {
-              //TODO: 再フェッチ
-              onSuccess();
-            }
-          });
-        },
+  return { like, isLikeLoading: isLoading || isTxLoading };
+};
+
+const useUnlike = ({ onSuccess, postId }: HooksProps) => {
+  const {
+    data,
+    isLoading,
+    write: unlike,
+  } = useContractWrite({
+    address: contractAddress,
+    abi: abi,
+    functionName: "unlike",
+    args: [postId],
+    mode: "recklesslyUnprepared",
+  });
+
+  const { isLoading: isTxLoading } = useTransaction({
+    hash: data?.hash,
+    onSuccess: async (tx) => {
+      tx.wait().then((v) => {
+        if (v.status == 1) {
+          //TODO: 再フェッチ
+          onSuccess();
+        }
       });
+    },
+  });
 
-    return {like, isLikeLoading: isLoading || isTxLoading }
-}
-
-const useUnlike = ({onSuccess, postId}: HooksProps) => {
-    const { data, isLoading, write: unlike } = useContractWrite({
-        address: contractAddress,
-        abi: abi,
-        functionName: "unlike",
-        args: [postId],
-        mode: "recklesslyUnprepared",
-      });
-
-      const { isLoading: isTxLoading } = useTransaction({
-        hash: data?.hash,
-        onSuccess: async (tx) => {
-          tx.wait().then((v) => {
-            if (v.status == 1) {
-              //TODO: 再フェッチ
-              onSuccess();
-            }
-          });
-        },
-      });
-
-    return {unlike, isUnlikeLoading: isLoading || isTxLoading }
-}
+  return { unlike, isUnlikeLoading: isLoading || isTxLoading };
+};
