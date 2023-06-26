@@ -1,13 +1,54 @@
-import { LIKED } from "src/utils/contract/const";
+import type { BigNumber } from "ethers";
+import { useState } from "react";
+import { abi, contractAddress, LIKED, NO_LIKED } from "src/utils/contract/const";
+import { useContractWrite, useTransaction } from "wagmi";
 
 type Props = {
+  postId: BigNumber;
   isLike: number;
   totalLikes: number;
 };
 
-export const LikeButton = ({ isLike, totalLikes }: Props) => {
+export const LikeButton = ({
+  isLike: isLikeProps,
+  postId,
+  totalLikes: totalLikesProps,
+}: Props) => {
+  const [isLike, setIsLike] = useState(isLikeProps);
+  const [totalLikes, setTotalLikes] = useState(totalLikesProps);
+
+  const {isLikeLoading, like} = useLike({postId, onSuccess: () => {
+    setIsLike(LIKED);
+    setTotalLikes((v) => v + 1);
+  }})
+
+  const {isUnlikeLoading, unlike} = useUnlike({postId, onSuccess: () => {
+    setIsLike(NO_LIKED);
+    setTotalLikes((v) => v - 1);
+  }})
+
+
+
+  const handleClick = () => {
+    //TODO: loading中は押せないように
+    if(isLike == LIKED) {
+        if (unlike) {
+            unlike();
+          }
+    }else {
+        if (like) {
+            like();
+          }
+    }
+  };
+
+  if (isLikeLoading || isUnlikeLoading) {
+    //TODO: loading
+    return <div></div>;
+  }
+
   return (
-    <button className="flex">
+    <button className="flex" onClick={handleClick}>
       <span className={`${isLike == LIKED && " text-crimson-10"}`}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -28,3 +69,56 @@ export const LikeButton = ({ isLike, totalLikes }: Props) => {
     </button>
   );
 };
+
+type HooksProps = {
+    postId: BigNumber
+    onSuccess: () => void
+}
+
+const useLike = ({onSuccess, postId}: HooksProps) => {
+    const { data, isLoading, write: like } = useContractWrite({
+        address: contractAddress,
+        abi: abi,
+        functionName: "like",
+        args: [postId],
+        mode: "recklesslyUnprepared",
+      });
+
+      const { isLoading: isTxLoading } = useTransaction({
+        hash: data?.hash,
+        onSuccess: async (tx) => {
+          tx.wait().then((v) => {
+            if (v.status == 1) {
+              //TODO: 再フェッチ
+              onSuccess();
+            }
+          });
+        },
+      });
+
+    return {like, isLikeLoading: isLoading || isTxLoading }
+}
+
+const useUnlike = ({onSuccess, postId}: HooksProps) => {
+    const { data, isLoading, write: unlike } = useContractWrite({
+        address: contractAddress,
+        abi: abi,
+        functionName: "unlike",
+        args: [postId],
+        mode: "recklesslyUnprepared",
+      });
+
+      const { isLoading: isTxLoading } = useTransaction({
+        hash: data?.hash,
+        onSuccess: async (tx) => {
+          tx.wait().then((v) => {
+            if (v.status == 1) {
+              //TODO: 再フェッチ
+              onSuccess();
+            }
+          });
+        },
+      });
+
+    return {unlike, isUnlikeLoading: isLoading || isTxLoading }
+}

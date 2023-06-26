@@ -1,17 +1,20 @@
 "use client";
 
+import { ADDRESS_ZERO } from "src/utils/const";
 import { abi, contractAddress } from "src/utils/contract/const";
 import { addressShortStr } from "src/utils/string/addressShortStr";
-import { useContractRead } from "wagmi";
+import { useAccount, useContractRead } from "wagmi";
 
 import { LikeButton } from "./LikeButton";
 
 export const PostList = () => {
+  const { address } = useAccount();
   const { data, isError, isLoading } = useContractRead({
     address: contractAddress,
     abi: abi,
     functionName: "getPosts",
     args: [1 as any],
+    overrides: { from: address ?? ADDRESS_ZERO },
   });
 
   if (isLoading) {
@@ -42,6 +45,7 @@ export const PostList = () => {
               <LikeButton
                 isLike={post.isLike.toNumber()}
                 totalLikes={post.totalLikes.toNumber()}
+                postId={post.postId}
               />
               <p className="text-mauve-11">
                 {new Date(post.time.toNumber() * 1000).toUTCString()}
