@@ -1,8 +1,9 @@
 "use client";
 
+// import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { abi, contractAddress } from "src/utils/contract/const";
-import { useContractWrite, useTransaction } from "wagmi";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
 
 import { useModal } from "../modal/Modal";
 
@@ -26,6 +27,9 @@ export const PostButton = () => {
 
 const PostForm = ({ onClose }: { onClose: () => void }) => {
   const [value, setValue] = useState<string>("");
+  // const router = useRouter();
+  // const searchParams = useSearchParams();
+  // const sort = searchParams.get("sort") ?? 2;
 
   const { data, isLoading, write } = useContractWrite({
     address: contractAddress,
@@ -34,13 +38,16 @@ const PostForm = ({ onClose }: { onClose: () => void }) => {
     mode: "recklesslyUnprepared",
   });
 
-  const { isLoading: isTxLoading, isSuccess} = useTransaction({ hash: data?.hash, onSuccess: async (tx) => {
-    tx.wait().then(v => {
-        if(v.status == 1) {
-             //TODO: 再フェッチ
-        }
-    })
-  } });
+  const { isLoading: isTxLoading, isSuccess } = useWaitForTransaction({
+    hash: data?.hash,
+    onSuccess: async (tx) => {
+      if (tx.status == 1) {
+        //todo: refetchしたい
+        window.location.reload();
+        onClose();
+      }
+    },
+  });
 
   const handleClick = () => {
     if (write) {
@@ -56,8 +63,8 @@ const PostForm = ({ onClose }: { onClose: () => void }) => {
     return <div>データ書き込み中</div>;
   }
 
-  if(isSuccess) {
-    return <div>投稿が完了しました</div>
+  if (isSuccess) {
+    return <div>投稿が完了しました</div>;
   }
 
   return (
