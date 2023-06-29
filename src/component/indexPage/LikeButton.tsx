@@ -6,7 +6,7 @@ import {
   LIKED,
   NO_LIKED,
 } from "src/utils/contract/const";
-import { useContractWrite, useTransaction } from "wagmi";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
 
 type Props = {
   postId: BigNumber;
@@ -100,15 +100,12 @@ const useLike = ({ onSuccess, postId }: HooksProps) => {
     mode: "recklesslyUnprepared",
   });
 
-  const { isLoading: isTxLoading } = useTransaction({
+  const { isLoading: isTxLoading } = useWaitForTransaction({
     hash: data?.hash,
     onSuccess: async (tx) => {
-      tx.wait().then((v) => {
-        if (v.status == 1) {
-          //TODO: 再フェッチ
-          onSuccess();
-        }
-      });
+      if (tx.status == 1) {
+        onSuccess();
+      }
     },
   });
 
@@ -128,15 +125,12 @@ const useUnlike = ({ onSuccess, postId }: HooksProps) => {
     mode: "recklesslyUnprepared",
   });
 
-  const { isLoading: isTxLoading } = useTransaction({
+  const { isLoading: isTxLoading } = useWaitForTransaction({
     hash: data?.hash,
     onSuccess: async (tx) => {
-      tx.wait().then((v) => {
-        if (v.status == 1) {
-          //TODO: 再フェッチ
-          onSuccess();
-        }
-      });
+      if (tx.status == 1) {
+        onSuccess();
+      }
     },
   });
 
