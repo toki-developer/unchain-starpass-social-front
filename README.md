@@ -1,8 +1,8 @@
 ## アプリ情報
 
-デプロイ先: https://unchain-starpass-social-front.vercel.app/
-使用したチェーン: Goerli
-Etherscan: https://goerli.etherscan.io/address/0x5A0993bAA75027B3E2AA42825D2d19Bb09F5E878
+デプロイ先: https://unchain-starpass-social-front.vercel.app/  
+使用したチェーン: Goerli  
+Etherscan: https://goerli.etherscan.io/address/0x5A0993bAA75027B3E2AA42825D2d19Bb09F5E878  
 
 ## 動画
 
